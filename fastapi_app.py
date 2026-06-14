@@ -37,9 +37,9 @@ app = FastAPI(
 )
 
 
-@app.get("/health", summary="Health check")
-def health():
-    return {"status": "ok"} 
+# @app.get("/health", summary="Health check")
+# def health():
+#     return {"status": "ok"} 
 
 @app.get("/items")
 def get_items(name: str, age: int = 10):

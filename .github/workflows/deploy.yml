@@ -37,6 +37,19 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            mkdir -p /opt/session1-rag-observability
+            cat > /opt/session1-rag-observability/prometheus.yml <<'EOF'
+            global:
+              scrape_interval: 5s
+
+            scrape_configs:
+              - job_name: "session1-rag-api"
+                static_configs:
+                  - targets:
+                      # Prometheus runs in Docker, so localhost would point at the Prometheus container.
+                      - "172.17.0.1:80"
+            EOF
+
             docker pull sameerz567/session1-rag:latest
             docker stop api-server || true
             docker rm api-server || true
@@ -45,3 +58,20 @@ jobs:
               -p 80:8000 \
               --env-file .env \
               sameerz567/session1-rag:latest
+
+            docker stop prometheus || true
+            docker rm prometheus || true
+            docker run -d \
+              --name prometheus \
+              -p 9090:9090 \
+              -v /opt/session1-rag-observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro \
+              prom/prometheus:latest \
+              --config.file=/etc/prometheus/prometheus.yml
+
+            docker stop grafana || true
+            docker rm grafana || true
+            docker run -d \
+              --name grafana \
+              -p 3000:3000 \
+              -e GF_SECURITY_ADMIN_PASSWORD=admin \
+              grafana/grafana:latest

@@ -5,6 +5,7 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from rag_core import RAGEngine, InMemorySessionStore
 from utils import load_settings
@@ -35,6 +36,9 @@ app = FastAPI(
     description="FastAPI wrapper for the session_1 RAG engine.",
     version="0.1.0",
 )
+
+# Expose Prometheus metrics from the real API so the deployed container can be scraped directly.
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 
 @app.get("/health", summary="Health check")

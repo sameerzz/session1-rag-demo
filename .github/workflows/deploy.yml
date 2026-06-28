@@ -38,6 +38,7 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             mkdir -p /opt/session1-rag-observability
+            rm -rf /opt/session1-rag-observability/prometheus.yml
             cat > /opt/session1-rag-observability/prometheus.yml <<'EOF'
             global:
               scrape_interval: 5s
@@ -59,8 +60,7 @@ jobs:
               --env-file .env \
               sameerz567/session1-rag:latest
 
-            docker stop prometheus || true
-            docker rm prometheus || true
+            docker rm -f prometheus || true
             docker run -d \
               --name prometheus \
               -p 9090:9090 \
@@ -68,8 +68,7 @@ jobs:
               prom/prometheus:latest \
               --config.file=/etc/prometheus/prometheus.yml
 
-            docker stop grafana || true
-            docker rm grafana || true
+            docker rm -f grafana || true
             docker run -d \
               --name grafana \
               -p 3000:3000 \

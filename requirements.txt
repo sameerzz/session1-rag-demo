@@ -1,6 +1,4 @@
 fastapi
 uvicorn[standard]
-python-dotenv
-google-genai
-langchain-community
-langchain-core
+prometheus-fastapi-instrumentator
+requests

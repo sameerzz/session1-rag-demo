@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "rag-fastapi"
+    static_configs:
+      - targets:
+          # Prometheus runs in Docker while FastAPI runs on the host.
+          # localhost inside the container points back to the container itself, not the VM host.
+          - "172.17.0.1:8000"
+

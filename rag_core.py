@@ -16,6 +16,7 @@ from google import genai
 from google.genai import types
 
 from langchain_community.chat_message_histories import ChatMessageHistory
+from langsmith import traceable
 
 from utils import Settings, load_settings, trim_history_to_words, build_transcript, load_prompt
 
@@ -98,6 +99,12 @@ Answer now.
         history.add_ai_message(answer)
 
         return answer
+
+
+RAGEngine.ask = traceable(
+    name="rag_engine_ask",
+    run_type="chain",
+)(RAGEngine.ask)
 
 
 # ================================

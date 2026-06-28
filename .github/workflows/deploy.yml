@@ -32,11 +32,25 @@ jobs:
 
       - name: Deploy to VM
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          FILE_SEARCH_STORE_NAME: ${{ secrets.FILE_SEARCH_STORE_NAME }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
+          envs: GOOGLE_API_KEY,FILE_SEARCH_STORE_NAME,LANGSMITH_API_KEY
           script: |
+            mkdir -p /opt/session1-rag
+            cat > /opt/session1-rag/.env <<EOF
+            GOOGLE_API_KEY=${GOOGLE_API_KEY}
+            FILE_SEARCH_STORE_NAME=${FILE_SEARCH_STORE_NAME}
+            LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+            LANGSMITH_TRACING=true
+            LANGSMITH_PROJECT=session1-rag
+            EOF
+
             mkdir -p /opt/session1-rag-observability
             rm -rf /opt/session1-rag-observability/prometheus.yml
             cat > /opt/session1-rag-observability/prometheus.yml <<'EOF'
@@ -57,7 +71,7 @@ jobs:
             docker run -d \
               --name api-server \
               -p 80:8000 \
-              --env-file .env \
+              --env-file /opt/session1-rag/.env \
               sameerz567/session1-rag:latest
 
             docker rm -f prometheus || true
